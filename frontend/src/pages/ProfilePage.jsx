@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
 
 const ProfilePage = () => {
-  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
-  const [selectedImg, setSelectedImg] = useState(null);
+  const { authUser, isUpdatingProfile, updateProfile, setAuthUser } = useAuthStore();
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -15,8 +13,19 @@ const ProfilePage = () => {
 
     reader.onload = async () => {
       const base64Image = reader.result;
-      setSelectedImg(base64Image);
-      await updateProfile({ profilePic: base64Image });
+
+      try {
+        // Update backend/profile
+        await updateProfile({ profilePic: base64Image });
+
+        // ✅ Update Zustand store immediately
+        setAuthUser({
+          ...authUser,
+          profilePic: base64Image,
+        });
+      } catch (error) {
+        console.error("Error updating profile:", error);
+      }
     };
   };
 
@@ -33,7 +42,7 @@ const ProfilePage = () => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
+                src={authUser?.profilePic || "/avatar.png"}
                 alt="PROFILE"
                 className="size-32 rounded-full object-cover border-4"
               />
@@ -59,7 +68,9 @@ const ProfilePage = () => {
               </label>
             </div>
             <p className="text-sm text-zinc-400">
-              {isUpdatingProfile ? "UPLOADING..." : "CLICK THE CAMERA ICON TO UPDATE YOUR PHOTO"}
+              {isUpdatingProfile
+                ? "UPLOADING..."
+                : "CLICK THE CAMERA ICON TO UPDATE YOUR PHOTO"}
             </p>
           </div>
 
@@ -90,7 +101,7 @@ const ProfilePage = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>MEMBER SINCE</span>
-                <span>{authUser.createdAt?.split("T")[0]}</span>
+                <span>{authUser?.createdAt?.split("T")[0]}</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span>ACCOUNT STATUS</span>
@@ -103,4 +114,5 @@ const ProfilePage = () => {
     </div>
   );
 };
+
 export default ProfilePage;
