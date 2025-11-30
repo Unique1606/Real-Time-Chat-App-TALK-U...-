@@ -1,4 +1,4 @@
-export const THEMES = [
+/*export const THEMES = [
   "light",
   "dark",
   "cupcake",
@@ -31,4 +31,8 @@ export const THEMES = [
   "dim",
   "nord",
   "sunset",
-];
+];*/
+
+// App now supports only two themes
+export const THEMES = ["light", "dark"];
+
